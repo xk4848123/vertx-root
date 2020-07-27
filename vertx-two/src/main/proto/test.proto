@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "proto.test";
+option java_outer_classname = "TestProto";
+
+// The greeting service definition.
+service Test {
+ // Sends a greeting
+ rpc SayTest (TestRequest) returns (TestReply) {}
+}
+
+// The request message containing the user's name.
+message TestRequest {
+ repeated string name = 1;
+}
+
+// The response message containing the greetings
+message TestReply {
+ repeated string name = 1;
+}
