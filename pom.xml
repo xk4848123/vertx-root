@@ -13,12 +13,16 @@
         <module>vertx-two</module>
         <module>vertx-data</module>
         <module>vertx-discovery</module>
+        <module>vert.x-create</module>
+        <module>vert.x-common</module>
     </modules>
     <properties>
         <vertx.version>3.9.2</vertx.version>
         <vertx.grpc.version>1.9.0</vertx.grpc.version>
         <lombok.version>1.18.12</lombok.version>
         <protostuff.version>1.7.2</protostuff.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <main.class>wanke.com.common.starter.AppCluster</main.class>
     </properties>
     <dependencies>
         <dependency>
@@ -65,5 +69,17 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
+    <build>
+       <plugins>
+         <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+            <source>1.8</source>
+            <target>1.8</target>
+        </configuration>
+         </plugin>
+       </plugins>
+    </build>
 </project>

@@ -21,14 +21,14 @@ public class AppCluster2 {
         EventBusOptions eventBusOptions = new EventBusOptions();
         // 本机Ip
         String hostAddress = InetAddress.getLocalHost().getHostAddress();
-        vertxOptions.setEventBusOptions(eventBusOptions).getEventBusOptions().setHost(hostAddress);
+        vertxOptions.setEventBusOptions(eventBusOptions).getEventBusOptions().setHost("192.168.3.2");
 
         HazelcastClusterManager clusterManager = new HazelcastClusterManager();
 
         vertxOptions.setClusterManager(clusterManager);
         Vertx.clusteredVertx(vertxOptions, res -> {
             Vertx result = res.result();
-            result.deployVerticle(new MainProtoClusterVerticle2(), r -> {
+            result.deployVerticle(new MainFlatClusterVerticle2(), r -> {
                 if (r.succeeded()) {
                     System.out.println(MainProtoClusterVerticle2.class.getName() + " --> 部署成功");
                 } else {

@@ -9,46 +9,25 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>vertx-discovery</artifactId>
-
-    <name>wertx-discovery</name>
+    <artifactId>vert.x-create</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>vert.x-create</name>
     <!-- FIXME change it to the project's website -->
     <url>http://www.example.com</url>
 
-    <properties>
-        <main.class>org.example.AppStart</main.class>
-    </properties>
 
     <dependencies>
 
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
+            <groupId>org.example</groupId>
+            <artifactId>vert.x-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-circuit-breaker</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-web-client</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-    </dependencies>
 
+    </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -65,7 +44,6 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>${main.class}</Main-Class>
-                                        <!--                                        <Main-Verticle>${main.verticle}</Main-Verticle>-->
                                     </manifestEntries>
                                 </transformer>
                             </transformers>

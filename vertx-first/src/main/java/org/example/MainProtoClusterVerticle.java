@@ -21,6 +21,7 @@ public class MainProtoClusterVerticle extends AbstractVerticle {
       System.out.println("收到消息");
       if (msg != null && msg.body() instanceof ProtoCommonMsg){
           ProtoCommonMsg receive_data = (ProtoCommonMsg) msg.body();
+          System.out.println(receive_data);
       }
       ProtoCommonMsg protoCommonMsg = new ProtoCommonMsg();
       for (int i =0; i<500 ; i ++){

@@ -27,14 +27,16 @@ public class MainProtoClusterVerticle2 extends AbstractVerticle {
     // 监听/index地址
     router.route("/index").handler(request -> {
       ProtoCommonMsg protoCommonMsg = new ProtoCommonMsg();
-      for (int i =0; i<500 ; i ++){
-        protoCommonMsg.put("name_" + i,"wan_ke");
-      }
+//      for (int i =0; i<500 ; i ++){
+//        protoCommonMsg.put("name_" + i,"wan_ke");
+//      }
+      protoCommonMsg.put("b", "2");
       //通过eventbus发送请求
-      eventBus.request("com.xiaoniu.bus", protoCommonMsg,options, msg -> {
+      eventBus.request("device.getdevice", protoCommonMsg,options, msg -> {
         if (msg.succeeded()) {
           if (msg.result() != null){
             ProtoCommonMsg proto = (ProtoCommonMsg) msg.result().body();
+            System.out.println(proto);
           }
         } else {
           System.err.println(msg.cause().getMessage());

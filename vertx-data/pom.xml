@@ -16,7 +16,7 @@
     <url>http://www.example.com</url>
 
     <properties>
-        <main.class>org.example.AppCluster</main.class>
+        <main.class>org.example.AppStart</main.class>
     </properties>
 
     <dependencies>

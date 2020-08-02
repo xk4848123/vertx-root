@@ -1,12 +1,13 @@
-package org.example;
+package wanke.com.common.starter;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
+import wanke.com.common.config.VertxConfig;
+import wanke.com.common.log.LogUtil;
+import wanke.com.common.verticle.ClusterVerticle;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * @Author: Administrator
@@ -16,24 +17,27 @@ import java.net.UnknownHostException;
  */
 public class AppCluster {
 
-    public static void main(String[] args) throws  UnknownHostException {
+    public static void main(String[] args)  {
+        try {
+            Class.forName("wanke.com.common.config.VertxConfig");
+        } catch (ClassNotFoundException e) {
+           System.exit(-1);
+        }
         final VertxOptions vertxOptions = new VertxOptions();
         EventBusOptions eventBusOptions = new EventBusOptions();
-        // 本机局域网Ip
-        String hostAddress = InetAddress.getLocalHost().getHostAddress();
         //设置eventbus数据监听端口
-        vertxOptions.setEventBusOptions(eventBusOptions).getEventBusOptions().setHost("192.168.3.2");
+        vertxOptions.setEventBusOptions(eventBusOptions).getEventBusOptions().setHost(VertxConfig.getDataIp());
         HazelcastClusterManager clusterManager = new HazelcastClusterManager();
         //集群方式启动
         vertxOptions.setClusterManager(clusterManager);
         Vertx.clusteredVertx(vertxOptions, res -> {
             Vertx result = res.result();
-            result.deployVerticle(new MainProtoClusterVerticle(), r -> {
+            result.deployVerticle(new ClusterVerticle(), r -> {
                 if (r.succeeded()) {
-                    System.out.println(MainProtoClusterVerticle.class.getName() + " --> 部署成功");
+                    LogUtil.infoDirect("vert.x is started successful !!!");
                 } else {
                     r.cause().printStackTrace();
-                    System.err.println(MainProtoClusterVerticle.class.getName() + " --> 部署失败, " + r.cause().getMessage());
+                    LogUtil.errorDirect("vert.x is started error !!!, " + r.cause().getMessage());
                 }
             });
         });
