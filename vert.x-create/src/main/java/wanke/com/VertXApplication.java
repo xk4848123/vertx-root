@@ -1,8 +1,9 @@
-package test;
+package wanke.com;
 
 import wanke.com.common.starter.AppCluster;
 
-public class Test {
+public class VertXApplication {
+
     public static void main(String[] args) {
         new AppCluster().main(args);
     }
