@@ -2,6 +2,7 @@ package com.wanke.client;
 
 import com.wanke.common.annotion.RequestMapping;
 import com.wanke.common.annotion.VertxClient;
+import com.wanke.pojo.User;
 
 import java.util.Map;
 
@@ -16,7 +17,7 @@ import java.util.Map;
 public interface myclient {
 
     @RequestMapping("getdevice")
-    public void test(Map map);
+    public User test(Map map);
 
 
 }

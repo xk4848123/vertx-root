@@ -2,13 +2,13 @@ package com.wanke.common.ioc;
 
 import com.wanke.common.annotion.*;
 import com.wanke.common.client.handle.VertxCientHandler;
+import com.wanke.common.config.VertxConfig;
 import com.wanke.common.log.LogUtil;
 import io.vertx.core.Vertx;
 import com.wanke.common.msg.msghandle.WrapMsg;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class BeansInitializer {
     protected static Map<Class, Object> registerMap = new HashMap();
 
     //注入补缺
-    protected static Map<Field,Object> pendingFields = new HashMap();
+    protected static Map<Field, Object> pendingFields = new HashMap();
 
     //初始化需要启动的component
     protected static List<Object> pendingInitComponent = new ArrayList();
@@ -53,11 +53,11 @@ public class BeansInitializer {
                     }
                     Type t = method.getAnnotatedReturnType().getType();
                     String typeName = t.getTypeName();
-//                    System.out.println(typeName);
-                    if (!typeName.equals("java.util.Map") && !typeName.equals("java.util.HashMap") && !typeName.equals("void") && !typeName.equals("wanke.com.common.dto.ResultDTO")) {
-                        LogUtil.errorDirect("must method with Map or HashMap or void");
-                        System.exit(-1);
-                    }
+                    System.out.println(typeName);
+//                    if (!typeName.equals("java.util.Map") && !typeName.equals("java.util.HashMap") && !typeName.equals("void") && !typeName.equals("java.lang.Object")) {
+//                        LogUtil.errorDirect("must method with Map or HashMap or void or Object");
+//                        System.exit(-1);
+//                    }
                     String secondRMString = curMethodRM.value();
                     vertx.eventBus().consumer(firstRMString + "." + secondRMString, msg -> {
                         WrapMsg wrapMsgReq = new WrapMsg();
@@ -71,17 +71,19 @@ public class BeansInitializer {
                         } else {
                             vertx.executeBlocking(future -> {
                                 try {
+                                    System.out.println(Thread.currentThread().getName());
                                     Object reply = method.invoke(o, wrapMsgReq);
                                     future.complete(reply);
                                 } catch (Exception e) {
                                     LogUtil.error(e.getMessage());
+                                    e.printStackTrace();
                                 }
-                            }, res -> {
+                            }, false,res -> {
                                 if (typeName.equals("java.util.HashMap") || typeName.equals("java.util.Map")) {
                                     wrapMsgReq.reply((Map) res.result());
                                 } else {
                                     Map resultMap = new HashMap<>();
-                                    resultMap.put("1", res.result());
+                                    resultMap.put(VertxConfig.getMsgKey(), res.result());
                                     wrapMsgReq.reply(resultMap);
                                 }
                             });
@@ -92,7 +94,7 @@ public class BeansInitializer {
         }
     }
 
-    public void initComponent(List<String> classList,Vertx vertx) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public void initComponent(List<String> classList, Vertx vertx) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         VertxCientHandler vertxCientHandler = new VertxCientHandler();
         vertxCientHandler.setVertx(vertx);
         for (String theClass : classList) {
@@ -127,7 +129,7 @@ public class BeansInitializer {
                 Class<?>[] componentInterfaces = clazz.getInterfaces();
                 if (componentInterfaces.length != 0) {
                     for (Class zz : componentInterfaces) {
-                        if (zz.equals(VertxInitializer.class)){
+                        if (zz.equals(VertxInitializer.class)) {
                             pendingInitComponent.add(o);
                             break;
                         }
@@ -136,19 +138,23 @@ public class BeansInitializer {
             }
         }
         repairField();
-        componentInit();
+        componentInit(vertx);
     }
-    private void repairField() throws ClassNotFoundException, IllegalAccessException {
-      for (Map.Entry<Field, Object> entry : pendingFields.entrySet()) {
-          Field field = entry.getKey();
-          Object fieldObject = registerMap.get(field.getType());
-          System.out.println(field.getType());
-          field.set(entry.getValue(),fieldObject);
-      }
+
+    private void repairField() throws IllegalAccessException {
+        for (Map.Entry<Field, Object> entry : pendingFields.entrySet()) {
+            Field field = entry.getKey();
+            Object fieldObject = registerMap.get(field.getType());
+            System.out.println(field.getType());
+            field.set(entry.getValue(), fieldObject);
+        }
     }
-    private void componentInit()  {
-     for (Object component : pendingInitComponent){
-         ((VertxInitializer) component).init();
-     }
+
+    private void componentInit(Vertx vertx) {
+        for (Object component : pendingInitComponent) {
+            vertx.executeBlocking(future -> {
+                ((VertxInitializer) component).init();
+            }, false,null);
+        }
     }
 }

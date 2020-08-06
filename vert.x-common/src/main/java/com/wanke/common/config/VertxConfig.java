@@ -74,6 +74,8 @@ public class VertxConfig {
 
     private static String cPkg;
 
+    private static String msgKey = "KEY";
+
     public static DeliveryOptions getOptions() {
         return options;
     }
@@ -112,5 +114,9 @@ public class VertxConfig {
 
     public static void setcPkg(String cPkg) {
         VertxConfig.cPkg = cPkg;
+    }
+
+    public static String getMsgKey() {
+        return msgKey;
     }
 }

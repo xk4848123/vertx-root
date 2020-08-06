@@ -23,11 +23,11 @@ public class DemoService implements VertxInitializer {
 
     @Override
     public void init() {
-        System.out.println("11111111111111");
         if (a != null){
             HashMap<Object, Object> map = new HashMap<>();
             map.put("1","c");
-            a.test(map);
+            System.out.println(Thread.currentThread().getName());
+            System.out.println("----" + a.test(map).getA());
         }else {
             System.out.println("null null");
         }
