@@ -12,6 +12,12 @@ import org.example.flat.FlatBuffersCommonMsg;
 public class MainFlatClusterVerticle extends AbstractVerticle {
 
     public void start() {
+        try {
+            Thread.sleep(30000);
+        }catch (Exception e){
+
+        }
+
         System.out.println("start thread" + Thread.currentThread().getName());
         //发布eventbus服务
         ProtoMessageCodec protoMessageCodec = new ProtoMessageCodec();
@@ -20,7 +26,7 @@ public class MainFlatClusterVerticle extends AbstractVerticle {
         eventBus.registerCodec(protoMessageCodec);
         eventBus.registerCodec(flatBuffersMessageCodec);
         DeliveryOptions options = new DeliveryOptions().setCodecName(flatBuffersMessageCodec.name());
-        eventBus.consumer("com.xiaoniu.bus", msg -> {
+        eventBus.consumer("device.getdevice", msg -> {
             System.out.println("收到消息");
             if (msg != null && msg.body() instanceof FlatBuffersCommonMsg){
                 FlatBuffersCommonMsg receive_data = (FlatBuffersCommonMsg) msg.body();

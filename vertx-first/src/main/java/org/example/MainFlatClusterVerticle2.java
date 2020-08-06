@@ -32,18 +32,8 @@ public class MainFlatClusterVerticle2 extends AbstractVerticle {
 //            }
             flatBuffersCommonMsg.put("b","2");
             //通过eventbus发送请求
-            eventBus.request("device.getdevice", flatBuffersCommonMsg,options, msg -> {
-                        if (msg.succeeded()) {
-                            if (msg.result() != null){
-                                FlatBuffersCommonMsg proto = (FlatBuffersCommonMsg) msg.result().body();
-                                System.out.println(proto);
-                            }
-                        } else {
-                            System.err.println(msg.cause().getMessage());
-                            msg.cause().printStackTrace();
-                        }
-                    }
-            );
+            eventBus.send("device.getdevice", flatBuffersCommonMsg,options);
+//            eventBus.publish("device.getdevice",flatBuffersCommonMsg,options);
             request.response().end("INDEX SUCCESS");
         });
 

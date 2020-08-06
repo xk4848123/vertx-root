@@ -15,14 +15,16 @@
         <module>vertx-discovery</module>
         <module>vert.x-create</module>
         <module>vert.x-common</module>
+        <module>vert.x-demo</module>
     </modules>
     <properties>
         <vertx.version>3.9.2</vertx.version>
         <vertx.grpc.version>1.9.0</vertx.grpc.version>
         <lombok.version>1.18.12</lombok.version>
         <protostuff.version>1.7.2</protostuff.version>
+        <lombok.version>1.18.12</lombok.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <main.class>wanke.com.common.starter.AppCluster</main.class>
+        <main.class>AppCluster</main.class>
     </properties>
     <dependencies>
         <dependency>

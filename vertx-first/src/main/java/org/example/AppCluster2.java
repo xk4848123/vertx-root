@@ -21,7 +21,7 @@ public class AppCluster2 {
         EventBusOptions eventBusOptions = new EventBusOptions();
         // 本机Ip
         String hostAddress = InetAddress.getLocalHost().getHostAddress();
-        vertxOptions.setEventBusOptions(eventBusOptions).getEventBusOptions().setHost("192.168.3.2");
+        vertxOptions.setEventBusOptions(eventBusOptions).getEventBusOptions().setHost("192.168.2.112");
 
         HazelcastClusterManager clusterManager = new HazelcastClusterManager();
 
