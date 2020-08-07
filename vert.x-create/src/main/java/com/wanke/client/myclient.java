@@ -1,10 +1,8 @@
 package com.wanke.client;
 
-import com.wanke.common.annotion.RequestMapping;
+import com.wanke.common.annotion.BusMapping;
 import com.wanke.common.annotion.VertxClient;
 import com.wanke.pojo.User;
-
-import java.util.Map;
 
 /**
  * @Author: chendi
@@ -13,11 +11,12 @@ import java.util.Map;
  * @Version: 1.0
  */
 @VertxClient
-@RequestMapping("device")
+@BusMapping("device")
 public interface myclient {
 
-    @RequestMapping("getdevice")
-    public User test(Map map);
+    @BusMapping("getdevice")
+    public User test(User msg);
 
-
+    @BusMapping("world.get")
+    public User test0(User msg);
 }

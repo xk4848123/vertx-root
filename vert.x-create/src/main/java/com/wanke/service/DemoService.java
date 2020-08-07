@@ -2,12 +2,10 @@ package com.wanke.service;
 
 import com.wanke.client.myclient;
 import com.wanke.common.annotion.Autowired;
-import com.wanke.common.annotion.Component;
-import com.wanke.common.client.handle.VertxCientHandler;
+import com.wanke.common.annotion.VertxComponent;
 import com.wanke.common.ioc.VertxInitializer;
-
-import java.lang.reflect.Proxy;
-import java.util.HashMap;
+import com.wanke.pojo.Name;
+import com.wanke.pojo.User;
 
 /**
  * @Author: chendi
@@ -15,19 +13,29 @@ import java.util.HashMap;
  * @Date: 2020/8/6 11:42
  * @Version: 1.0
  */
-@Component
+@VertxComponent
 public class DemoService implements VertxInitializer {
 
     @Autowired
     private myclient a;
 
+    @Autowired
+    private CacheService cacheService;
+
+    @Autowired
+    private User myUser;
+
+    @Autowired
+    private Name name;
+
     @Override
     public void init() {
         if (a != null){
-            HashMap<Object, Object> map = new HashMap<>();
-            map.put("1","c");
-            System.out.println(Thread.currentThread().getName());
-            System.out.println("----" + a.test(map).getA());
+            System.out.println("-----");
+            System.out.println(myUser.getName());
+            System.out.println(name);
+            System.out.println("-----");
+            cacheService.test();
         }else {
             System.out.println("null null");
         }

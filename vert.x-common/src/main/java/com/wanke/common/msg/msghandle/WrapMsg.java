@@ -6,6 +6,7 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import com.wanke.common.msg.proto.ProtoCommonMsg;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class WrapMsg {
@@ -29,19 +30,21 @@ public class WrapMsg {
         }
     }
 
-    public void reply(Map reply_dataMap){
-        Object reply_data = null;
+    public void reply(Object reply_data){
+        Map reply_wrap = new HashMap();
+        reply_wrap.put(VertxConfig.getMsgKey(), reply_data);
+        Object final_return = null;
         if (VertxConfig.getFormat().equals("json")){
-            reply_data = new JsonObject(reply_dataMap);
+            final_return = new JsonObject(reply_wrap);
         }else if(VertxConfig.getFormat().equals("proto")){
-            reply_data = new ProtoCommonMsg(reply_dataMap);
+            final_return = new ProtoCommonMsg(reply_wrap);
         }else {
-            reply_data = new FlatBuffersCommonMsg(reply_dataMap);
+            final_return = new FlatBuffersCommonMsg(reply_wrap);
         }
-        innerMsg.reply(reply_data,VertxConfig.getOptions());
+        innerMsg.reply(final_return,VertxConfig.getOptions());
     }
 
-    public Map body() {
+    public <T> T body() {
         if (this.innerMsg != null){
             if (VertxConfig.getFormat().equals("json")){
                 req_dataMap = ((JsonObject) this.innerMsg.body()).getMap();
@@ -51,8 +54,15 @@ public class WrapMsg {
                 req_dataMap = ((FlatBuffersCommonMsg) this.innerMsg.body()).getMap();
             }
         }
-        return req_dataMap;
+        return (T) req_dataMap.get(VertxConfig.getMsgKey());
     }
+
+    public static Map newMap(Object o){
+        Map requestMap = new HashMap();
+        requestMap.put(VertxConfig.getMsgKey(),o);
+        return requestMap;
+    }
+
 
     @Override
     public String toString() {

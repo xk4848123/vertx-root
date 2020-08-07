@@ -12,6 +12,8 @@ public class User {
 
     private Integer b;
 
+    private Name name;
+
     public String getA() {
         return a;
     }
@@ -27,4 +29,6 @@ public class User {
     public void setB(Integer b) {
         this.b = b;
     }
+
+
 }

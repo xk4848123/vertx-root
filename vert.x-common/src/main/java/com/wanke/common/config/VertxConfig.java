@@ -76,6 +76,8 @@ public class VertxConfig {
 
     private static String msgKey = "KEY";
 
+    private static String timeout = "10000";
+
     public static DeliveryOptions getOptions() {
         return options;
     }
@@ -118,5 +120,13 @@ public class VertxConfig {
 
     public static String getMsgKey() {
         return msgKey;
+    }
+
+    public static String getTimeout() {
+        return timeout;
+    }
+
+    public static void setTimeout(String timeout) {
+        VertxConfig.timeout = timeout;
     }
 }

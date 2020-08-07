@@ -4,7 +4,6 @@ import com.wanke.common.config.VertxConfig;
 import com.wanke.common.ioc.BeansInitializer;
 import com.wanke.common.log.LogUtil;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 
 import com.wanke.common.msg.messagecodec.FlatBuffersMessageCodec;
@@ -27,7 +26,7 @@ public class ClusterVerticle extends AbstractVerticle {
             List<String> clientList = ScanPackageClassUtil.getClassNameFromPackage(VertxConfig.getcPkg());
             beans.initComponent(clientList,vertx);
             List<String> controllerList = ScanPackageClassUtil.getClassNameFromPackage(VertxConfig.getPkg());
-            LogUtil.info(controllerList.toString());
+            LogUtil.infoDirect(controllerList.toString());
             beans.initController(controllerList, vertx);
 
         } catch (Exception e) {

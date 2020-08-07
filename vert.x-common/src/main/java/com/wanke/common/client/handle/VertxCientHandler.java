@@ -1,6 +1,8 @@
 package com.wanke.common.client.handle;
 
-import com.wanke.common.annotion.RequestMapping;
+import com.wanke.common.annotion.Publish;
+import com.wanke.common.annotion.BusMapping;
+import com.wanke.common.annotion.VertxClient;
 import com.wanke.common.config.VertxConfig;
 import com.wanke.common.log.LogUtil;
 import com.wanke.common.msg.msghandle.WrapMsg;
@@ -11,10 +13,11 @@ import io.vertx.core.eventbus.EventBus;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @Author: chendi
@@ -27,6 +30,8 @@ public class VertxCientHandler implements InvocationHandler {
     private static AtomicInteger count = new AtomicInteger(0);
     
     private static volatile Map resMap = new HashMap();
+
+    private static  Map emptyMap = new HashMap();
     
     private Vertx vertx;
 
@@ -40,14 +45,39 @@ public class VertxCientHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        RequestMapping classRM = method.getDeclaringClass().getAnnotation(RequestMapping.class);
+        Class<?> declaringClass = method.getDeclaringClass();
+        Publish publishAnnotation = declaringClass.getAnnotation(Publish.class);
+        VertxClient vertxClientAnnotation = declaringClass.getAnnotation(VertxClient.class);
+        Class<?> returnType = method.getReturnType();
+        BusMapping classRM = declaringClass.getAnnotation(BusMapping.class);
         String headMapping = classRM.value();
-        RequestMapping methodRM = method.getAnnotation(RequestMapping.class);
+        BusMapping methodRM = method.getAnnotation(BusMapping.class);
         String methodMapping = methodRM.value();
         EventBus eventBus = vertx.eventBus();
+        //wrap args
+        Map requestMap = null;
+        if (args == null || args.length == 0){
+            requestMap = emptyMap;
+
+        }else {
+            requestMap = WrapMsg.newMap(args[0]);
+        }
+        //publish data
+        if (publishAnnotation != null){
+            System.out.println(headMapping + "." + methodMapping);
+            publish(headMapping,methodMapping,requestMap,eventBus);
+            return null;
+        }
+
+        //send data without return
+        if (vertxClientAnnotation != null && returnType.getTypeName().equals("void")){
+            send(headMapping,methodMapping,requestMap,eventBus);
+            return  null;
+        }
+
+       //request for response
         int serialNumber = count.getAndIncrement();
-        ReentrantLock lock = new ReentrantLock();
-        eventBus.request(headMapping + "." + methodMapping, new WrapMsg().request((Map) args[0]), VertxConfig.getOptions(), msg -> {
+        eventBus.request(headMapping + "." + methodMapping, new WrapMsg().request(requestMap), VertxConfig.getOptions(), msg -> {
             if (msg.succeeded()) {
                 if (msg.result() != null) {
                     ProtoCommonMsg proto = (ProtoCommonMsg) msg.result().body();
@@ -59,12 +89,32 @@ public class VertxCientHandler implements InvocationHandler {
                 LogUtil.error(msg.cause().getMessage());
             }
         });
+        Timestamp cur_timestamp= Timestamp.valueOf(LocalDateTime.now());
+        long curTime = cur_timestamp.getTime();
         for(;;){
+            //超时机制
+            if (Timestamp.valueOf(LocalDateTime.now()).getTime() - curTime > Long.valueOf(VertxConfig.getTimeout()) ){
+                break;
+            }
            if (resMap.get(serialNumber) != null){
                break;
            }
         }
-        return resMap.get(serialNumber);
+        Object res = resMap.get(serialNumber);
+        if (res instanceof Exception){
+            throw (Exception) res;
+        }else {
+            return resMap.get(serialNumber);
+        }
+    }
+
+
+    void publish(String headMapping,String methodMapping,Map data,EventBus bus){
+        bus.publish(headMapping + "." + methodMapping,new WrapMsg().request(data),VertxConfig.getOptions());
+    }
+
+    void send(String headMapping,String methodMapping,Map data,EventBus bus){
+        bus.send(headMapping + "." + methodMapping,new WrapMsg().request(data),VertxConfig.getOptions());
     }
 
 }

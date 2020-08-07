@@ -12,6 +12,8 @@ public class User {
 
     private Integer b;
 
+    private Name name;
+
     public String getA() {
         return a;
     }
@@ -26,5 +28,13 @@ public class User {
 
     public void setB(Integer b) {
         this.b = b;
+    }
+
+    public Name getName() {
+        return name;
+    }
+
+    public void setName(Name name) {
+        this.name = name;
     }
 }
