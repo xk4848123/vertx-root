@@ -11,10 +11,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: chendi
@@ -33,7 +30,8 @@ public class BeansInitializer {
     //初始化需要启动的component
     protected static List<Object> pendingInitComponent = new ArrayList();
 
-    //VertxBean方法生成
+    //VertxConfiguration集合
+    protected  static List<Class<?>> pendingInitConfiguration = new ArrayList<>();
 
     public void initController(List<String> classList, Vertx vertx) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         for (String theClass : classList) {
@@ -106,22 +104,15 @@ public class BeansInitializer {
                     Class<?>[] interfaces = clazz.getInterfaces();
                     if (interfaces.length != 0) {
                         for (Class zz : interfaces) {
+                            if (zz.equals(VertxInitializer.class)){
+                                continue;
+                            }
                             registerMap.put(zz, o);
                         }
                     }
                 }
                 Field[] declaredFields = clazz.getDeclaredFields();
-                for (Field field : declaredFields) {
-                    if (field.isAnnotationPresent(Autowired.class)) {
-                        field.setAccessible(true);
-                        Object fieldObject = registerMap.get(field.getClass());
-                        if (fieldObject == null) {
-                            pendingFields.put(field, o);
-                        } else {
-                            field.set(o, fieldObject);
-                        }
-                    }
-                }
+                autowiredField(declaredFields,o);
                 Class<?>[] componentInterfaces = clazz.getInterfaces();
                 if (componentInterfaces.length != 0) {
                     for (Class zz : componentInterfaces) {
@@ -132,26 +123,27 @@ public class BeansInitializer {
                     }
                 }
             }else if(clazz.isAnnotationPresent(VertxConfiguration.class)){
-                Object configurationProxy = VertxConfigurationHandler.getConfigurationProxy(clazz.newInstance());
-                Method[] methods = clazz.getMethods();
-                for (Method method : methods) {
-                    VertxBean vertxBeanAnnotation = method.getAnnotation(VertxBean.class);
-                    if (vertxBeanAnnotation == null){
-                        continue;
-                    }
-                    method.invoke(configurationProxy,null);
-                }
+                pendingInitConfiguration.add(clazz);
+
             }
         }
+        //第一次修复VertxComponent字段中没注入的属性
+        repairField();
+        initConfiguration();
+        //第二次修复VertxComponent字段中没注入的属性
         repairField();
         componentInit(vertx);
     }
 
     private void repairField() throws IllegalAccessException {
-        for (Map.Entry<Field, Object> entry : pendingFields.entrySet()) {
-            Field field = entry.getKey();
+        for (Iterator<Map.Entry<Field, Object>> it = pendingFields.entrySet().iterator(); it.hasNext();){
+            Map.Entry<Field, Object> item = it.next();
+            Field field = item.getKey();
             Object fieldObject = registerMap.get(field.getType());
-            field.set(entry.getValue(), fieldObject);
+            if (fieldObject != null){
+                field.set(item.getValue(), fieldObject);
+                it.remove();
+            }
         }
     }
 
@@ -160,6 +152,37 @@ public class BeansInitializer {
             vertx.executeBlocking(future -> {
                 ((VertxInitializer) component).init();
             }, false,null);
+        }
+    }
+
+    private void initConfiguration() throws IllegalAccessException, InstantiationException, InvocationTargetException {
+        for (Class<?> clazz : pendingInitConfiguration) {
+            Object configurationProxy = VertxConfigurationHandler.getConfigurationProxy(clazz.newInstance());
+            Field[] declaredFields = clazz.getDeclaredFields();
+            autowiredField(declaredFields,configurationProxy);
+            Method[] methods = clazz.getMethods();
+            for (Method method : methods) {
+                VertxBean vertxBeanAnnotation = method.getAnnotation(VertxBean.class);
+                if (vertxBeanAnnotation == null) {
+                    continue;
+                }
+                method.invoke(configurationProxy, null);
+            }
+        }
+    }
+
+    private void autowiredField(Field[] declaredFields,Object o) throws IllegalAccessException {
+        for (Field field : declaredFields) {
+            if (field.isAnnotationPresent(Autowired.class)) {
+                field.setAccessible(true);
+                System.out.println(field.getType());
+                Object fieldObject = registerMap.get(field.getType());
+                if (fieldObject == null) {
+                    pendingFields.put(field, o);
+                } else {
+                    field.set(o, fieldObject);
+                }
+            }
         }
     }
 

@@ -14,7 +14,6 @@ public class DemoController {
     public User get(User msg){
         //获取传参
         System.out.println(msg.getA());
-        int a =1 / 0;
         //返回结果
         User user = new User();
         user.setA("adf32");

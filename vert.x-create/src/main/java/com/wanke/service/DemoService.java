@@ -31,10 +31,12 @@ public class DemoService implements VertxInitializer {
     @Override
     public void init() {
         if (a != null){
+
             System.out.println("-----");
             System.out.println(myUser.getName());
             System.out.println(name);
             System.out.println("-----");
+            System.out.println("client::::" + a.test0(myUser).getB());
             cacheService.test();
         }else {
             System.out.println("null null");
@@ -42,4 +44,7 @@ public class DemoService implements VertxInitializer {
 
     }
 
+    public myclient getA() {
+        return a;
+    }
 }

@@ -1,9 +1,11 @@
 package com.wanke.configuration;
 
+import com.wanke.common.annotion.Autowired;
 import com.wanke.common.annotion.VertxBean;
 import com.wanke.common.annotion.VertxConfiguration;
 import com.wanke.pojo.Name;
 import com.wanke.pojo.User;
+import com.wanke.service.DemoService;
 
 /**
  * @Author: chendi
@@ -15,10 +17,12 @@ import com.wanke.pojo.User;
 public class TestConfiguration {
 
 
+    @Autowired
+    private DemoService demoService;
+
     @VertxBean
     public User getUser(){
         User user = new User();
-        System.out.println(1);
         user.setA("我的");
         user.setName(getName());
         return user;

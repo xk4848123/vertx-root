@@ -31,6 +31,7 @@ public class ClusterVerticle extends AbstractVerticle {
 
         } catch (Exception e) {
             LogUtil.errorDirect(e.getMessage());
+            e.printStackTrace();
             System.exit(-1);
         }
     }
